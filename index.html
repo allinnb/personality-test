@@ -1,0 +1,1038 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>自我发现测试 | MBTI × SBTI × 动物人格 × 国际课程匹配</title>
+<meta name="description" content="MBTI × SBTI 双轨人格探索，测出你的动物人格与国际课程匹配度，适合初高中学生">
+<meta property="og:title" content="你是哪种动物人格？">
+<meta property="og:description" content="MBTI × SBTI × 国际课程匹配，5分钟测出你的专属人格代码">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+  --primary: #6366f1;
+  --primary-dark: #4f46e5;
+  --secondary: #ec4899;
+  --success: #10b981;
+  --warning: #f59e0b;
+  --bg: #0f172a;
+  --bg2: #020617;
+  --card: #1e293b;
+  --card2: #334155;
+  --text: #f1f5f9;
+  --text-muted: #94a3b8;
+  --gradient: linear-gradient(135deg, var(--primary), var(--secondary));
+}
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+.container { max-width: 520px; margin: 0 auto; padding: 16px; min-height: 100vh; }
+.hidden { display: none !important; }
+
+/* 背景装饰 */
+.bg-orbs {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  pointer-events: none; z-index: 0; overflow: hidden;
+}
+.orb {
+  position: absolute; border-radius: 50%;
+  filter: blur(80px); opacity: 0.15;
+}
+.orb-1 { width: 400px; height: 400px; background: var(--primary); top: -100px; right: -100px; }
+.orb-2 { width: 300px; height: 300px; background: var(--secondary); bottom: -50px; left: -100px; }
+.orb-3 { width: 200px; height: 200px; background: var(--success); top: 50%; left: 50%; transform: translate(-50%,-50%); }
+
+/* 欢迎页 */
+.welcome-screen {
+  min-height: 100vh; display: flex; flex-direction: column;
+  justify-content: center; align-items: center; text-align: center;
+  padding: 32px 24px; position: relative; z-index: 1;
+}
+.welcome-icon { font-size: 72px; margin-bottom: 20px; animation: float 3s ease-in-out infinite; }
+@keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
+.welcome-title { font-size: 30px; font-weight: 800; margin-bottom: 6px;
+  background: var(--gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.welcome-subtitle { color: var(--text-muted); font-size: 15px; margin-bottom: 6px; line-height: 1.7; }
+.welcome-subtitle2 { color: var(--text-muted); font-size: 13px; margin-bottom: 28px; line-height: 1.6; }
+.welcome-animals { font-size: 38px; margin-bottom: 28px; letter-spacing: 6px; }
+.welcome-cta {
+  background: var(--gradient); color: white; border: none;
+  padding: 18px 52px; border-radius: 50px; font-size: 17px;
+  font-weight: 700; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 8px 32px rgba(99,102,241,0.4); letter-spacing: 1px;
+}
+.welcome-cta:hover { transform: translateY(-3px); box-shadow: 0 14px 44px rgba(99,102,241,0.5); }
+.welcome-divider { display: flex; align-items: center; gap: 16px; margin: 20px 0; width: 80%; }
+.welcome-divider::before, .welcome-divider::after { content:''; flex:1; height:1px; background: rgba(255,255,255,0.1); }
+.welcome-divider span { color: var(--text-muted); font-size: 12px; }
+.welcome-animal-btn {
+  background: rgba(255,255,255,0.05); border: 2px solid rgba(255,255,255,0.15);
+  color: var(--text); padding: 16px 36px; border-radius: 50px;
+  font-size: 15px; font-weight: 600; cursor: pointer;
+  transition: all 0.2s; display: flex; align-items: center; gap: 8px;
+}
+.welcome-animal-btn:hover { background: rgba(236,72,153,0.2); border-color: var(--secondary); transform: translateY(-2px); }
+.welcome-info { margin-top: 28px; color: var(--text-muted); font-size: 13px; }
+
+/* 进度条 */
+.progress-bar { background: var(--card); height: 5px; border-radius: 3px; margin-bottom: 20px; }
+.progress-fill { background: var(--gradient); height: 100%; border-radius: 3px; transition: width 0.4s ease; }
+.progress-text { color: var(--text-muted); font-size: 13px; margin-bottom: 6px; display: flex; justify-content: space-between; }
+
+/* 题目卡片 */
+.question-card { background: var(--card); border-radius: 24px; padding: 24px; animation: slideUp 0.3s ease; position: relative; z-index: 1; }
+@keyframes slideUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+.module-badge { display: inline-block; background: rgba(99,102,241,0.2); color: var(--primary); padding: 4px 14px; border-radius: 20px; font-size: 11px; font-weight: 700; margin-bottom: 14px; text-transform: uppercase; letter-spacing: 1px; }
+.module-badge.sbti { background: rgba(236,72,153,0.2); color: var(--secondary); }
+.module-badge.style { background: rgba(16,185,129,0.2); color: var(--success); }
+.module-badge.resilience { background: rgba(245,158,11,0.2); color: var(--warning); }
+.question-number { color: var(--text-muted); font-size: 12px; margin-bottom: 6px; }
+.question-text { font-size: 19px; font-weight: 700; margin-bottom: 18px; line-height: 1.5; }
+
+/* 选项 */
+.options { display: flex; flex-direction: column; gap: 10px; }
+.option-btn {
+  background: rgba(255,255,255,0.04); border: 2px solid rgba(255,255,255,0.08);
+  color: var(--text); padding: 15px 16px; border-radius: 14px; text-align: left;
+  font-size: 14px; cursor: pointer; transition: all 0.2s;
+  display: flex; align-items: center; gap: 12px; line-height: 1.4;
+}
+.option-btn:hover { background: rgba(99,102,241,0.15); border-color: var(--primary); transform: translateX(4px); }
+.option-btn.selected { background: var(--primary); border-color: var(--primary); box-shadow: 0 4px 20px rgba(99,102,241,0.3); }
+.option-emoji { font-size: 22px; flex-shrink: 0; }
+.option-letter { font-weight: 800; color: var(--primary); flex-shrink: 0; width: 22px; }
+.option-btn.selected .option-letter { color: white; }
+
+/* SBTI多选 */
+.sbti-hint { font-size: 12px; color: var(--text-muted); margin-bottom: 14px;
+  background: rgba(255,255,255,0.04); padding: 10px 14px; border-radius: 10px;
+  border-left: 3px solid var(--secondary); }
+.sbti-hint span { color: var(--warning); font-weight: 700; }
+.multi-select .option-btn.selected { background: rgba(236,72,153,0.25); border-color: var(--secondary); }
+.multi-select .option-btn.selected::after {
+  content: '✓'; position: absolute; top: 8px; right: 12px;
+  background: var(--secondary); width: 20px; height: 20px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 800; color: white;
+}
+.option-btn { position: relative; }
+
+/* 导航 */
+.nav-buttons { display: flex; gap: 12px; margin-top: 20px; }
+.nav-btn {
+  flex: 1; padding: 15px; border-radius: 14px; font-size: 15px; font-weight: 700;
+  cursor: pointer; transition: all 0.2s; border: none; letter-spacing: 0.5px;
+}
+.nav-btn.prev { background: rgba(255,255,255,0.08); color: var(--text-muted); }
+.nav-btn.prev:hover { background: rgba(255,255,255,0.12); }
+.nav-btn.next { background: var(--gradient); color: white; box-shadow: 0 4px 20px rgba(99,102,241,0.3); }
+.nav-btn.next:disabled { opacity: 0.35; cursor: not-allowed; transform: none !important; box-shadow: none; }
+.nav-btn.next:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(99,102,241,0.4); }
+
+/* 加载页 */
+.loading { text-align: center; padding: 80px 0; }
+.loading-animal { font-size: 72px; animation: bounce 1.2s infinite; }
+@keyframes bounce { 0%,100%{transform:scale(1) translateY(0)} 50%{transform:scale(1.1) translateY(-15px)} }
+.loading-text { color: var(--text-muted); margin-top: 20px; font-size: 15px; }
+.loading-sub { color: var(--text-muted); font-size: 12px; margin-top: 8px; opacity: 0.7; }
+.loading-bar { width: 60%; height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; margin: 20px auto 0; overflow: hidden; }
+.loading-bar-fill { height: 100%; background: var(--gradient); border-radius: 2px; animation: loadFill 1.5s ease forwards; }
+@keyframes loadFill { from{width:0} to{width:100%} }
+
+/* 结果页 */
+.result-screen { padding: 16px 0 40px; animation: slideUp 0.5s ease; }
+.result-hero {
+  text-align: center; padding: 32px 20px 28px;
+  background: var(--card); border-radius: 28px; margin-bottom: 16px;
+  position: relative; overflow: hidden;
+}
+.result-hero::before {
+  content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+  background: conic-gradient(from 0deg, rgba(99,102,241,0.1), rgba(236,72,153,0.1), rgba(99,102,241,0.1));
+  animation: spin 8s linear infinite;
+}
+@keyframes spin { to{transform:rotate(360deg)} }
+.result-hero-content { position: relative; z-index: 1; }
+.result-badge { display: inline-block; background: var(--gradient); padding: 6px 20px; border-radius: 30px; font-size: 12px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 16px; }
+.result-animal { font-size: 110px; margin-bottom: 12px; display: block; }
+.result-title { font-size: 32px; font-weight: 800; margin-bottom: 4px; }
+.result-subtitle { color: var(--secondary); font-size: 15px; font-weight: 600; margin-bottom: 12px; }
+.result-mbti { display: inline-flex; gap: 4px; margin-top: 8px; }
+.result-mbti-letter {
+  width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center;
+  justify-content: center; font-size: 18px; font-weight: 800;
+}
+.result-mbti-letter.E, .result-mbti-letter.S, .result-mbti-letter.T, .result-mbti-letter.J {
+  background: rgba(99,102,241,0.25); color: #818cf8;
+}
+.result-mbti-letter.I, .result-mbti-letter.N, .result-mbti-letter.F, .result-mbti-letter.P {
+  background: rgba(236,72,153,0.25); color: #f472b6;
+}
+
+.result-quote {
+  background: linear-gradient(135deg, rgba(99,102,241,0.15), rgba(236,72,153,0.15));
+  border-left: 4px solid var(--secondary);
+  padding: 18px 20px; border-radius: 0 16px 16px 0;
+  font-size: 14px; line-height: 1.8; margin: 16px 0;
+  color: rgba(255,255,255,0.9);
+}
+.result-quote::before { content: '"'; font-size: 32px; color: var(--secondary); font-family: Georgia, serif; line-height: 0; vertical-align: -8px; margin-right: 4px; }
+
+/* 结果卡片 */
+.result-card { background: var(--card); border-radius: 20px; padding: 22px; margin-bottom: 14px; }
+.result-card-title { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 10px; font-weight: 700; }
+.result-card-value { font-size: 22px; font-weight: 800; margin-bottom: 6px; }
+.result-card-desc { font-size: 13px; color: var(--text-muted); line-height: 1.7; }
+
+/* SBTI图表 */
+.sbti-chart { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }
+.sbti-bar { display: flex; align-items: center; gap: 10px; }
+.sbti-bar-label { font-size: 13px; width: 44px; flex-shrink: 0; font-weight: 600; }
+.sbti-bar-track { flex: 1; height: 10px; background: rgba(255,255,255,0.07); border-radius: 5px; overflow: hidden; }
+.sbti-bar-fill { height: 100%; border-radius: 5px; transition: width 0.8s cubic-bezier(0.4,0,0.2,1); }
+.sbti-bar-value { font-size: 12px; width: 20px; text-align: right; color: var(--text-muted); }
+
+/* 课程网格 */
+.course-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px; }
+.course-item { background: rgba(255,255,255,0.05); padding: 14px 10px; border-radius: 14px; text-align: center; transition: all 0.2s; }
+.course-item:hover { background: rgba(99,102,241,0.15); }
+.course-item-icon { font-size: 24px; margin-bottom: 6px; }
+.course-item-name { font-size: 13px; font-weight: 700; margin-bottom: 3px; }
+.course-item-sub { font-size: 11px; color: var(--text-muted); }
+.course-item.main { border: 2px solid var(--primary); background: rgba(99,102,241,0.15); }
+.course-item.main .course-item-name { color: var(--primary); }
+
+/* 选课建议 */
+.subject-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.subject-chip { background: rgba(255,255,255,0.07); padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+.subject-chip.hl { background: rgba(99,102,241,0.25); color: #818cf8; border: 1px solid rgba(99,102,241,0.4); }
+.subject-chip.sl { background: rgba(16,185,129,0.2); color: #34d399; border: 1px solid rgba(16,185,129,0.4); }
+
+/* 超能力/盲区 */
+.power-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
+.power-item { background: rgba(255,255,255,0.04); padding: 14px; border-radius: 14px; }
+.power-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+.power-label.good { color: var(--success); }
+.power-label.bad { color: var(--warning); }
+.power-text { font-size: 12px; color: var(--text-muted); line-height: 1.6; }
+
+/* 分享按钮 */
+.share-btn {
+  width: 100%; padding: 16px; border-radius: 16px; border: none;
+  background: linear-gradient(135deg, #25D366, #128C7E); color: white;
+  font-size: 15px; font-weight: 700; cursor: pointer; margin-top: 14px;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 4px 20px rgba(37,211,102,0.25);
+}
+.share-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(37,211,102,0.35); }
+.retest-btn {
+  width: 100%; padding: 14px; border-radius: 14px;
+  border: 2px solid rgba(255,255,255,0.15); background: transparent;
+  color: var(--text); font-size: 14px; font-weight: 600; cursor: pointer;
+  margin-top: 10px; transition: all 0.2s;
+}
+.retest-btn:hover { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.25); }
+
+/* 动物选择预览页 */
+.animal-variant-hero {
+  text-align: center; padding: 48px 20px 32px;
+  background: var(--card); border-radius: 28px; margin-bottom: 16px;
+}
+.animal-variant-title { font-size: 22px; font-weight: 800; margin-bottom: 8px; }
+.animal-variant-sub { color: var(--text-muted); font-size: 14px; margin-bottom: 24px; }
+.animal-select-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+.animal-select-item {
+  background: var(--card); border: 2px solid transparent; border-radius: 16px;
+  padding: 16px 6px; text-align: center; cursor: pointer; transition: all 0.2s;
+}
+.animal-select-item:hover { border-color: var(--primary); transform: scale(1.08); box-shadow: 0 8px 24px rgba(99,102,241,0.2); }
+.animal-select-item.selected { border-color: var(--secondary); background: rgba(236,72,153,0.15); box-shadow: 0 8px 24px rgba(236,72,153,0.2); }
+.animal-select-icon { font-size: 40px; margin-bottom: 6px; display: block; }
+.animal-select-name { font-size: 11px; color: var(--text-muted); font-weight: 600; }
+
+/* 响应式 */
+@media (max-width: 400px) {
+  .course-grid { grid-template-columns: 1fr; }
+  .power-grid { grid-template-columns: 1fr; }
+  .result-mbti-letter { width: 36px; height: 36px; font-size: 16px; }
+  .animal-select-grid { grid-template-columns: repeat(3, 1fr); }
+}
+</style>
+</head>
+<body>
+<div class="bg-orbs">
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+</div>
+<div class="container" id="app"></div>
+
+<script>
+// ==================== 完整题目数据 ====================
+const QUESTIONS = [
+  // --- 模块1：MBTI E/I (4题) ---
+  { module: 1, dimension: 'EI', type: 'single', question: '放学后你更想：', options: [
+    { emoji: '⚡', text: '和朋友一起出去玩，聊今天发生的所有事', letter: 'A', value: 'E' },
+    { emoji: '🌙', text: '回家安静地待一会儿，整理自己的思绪', letter: 'B', value: 'I' }
+  ]},
+  { module: 1, dimension: 'EI', type: 'single', question: '课堂讨论时，你通常：', options: [
+    { emoji: '🗣️', text: '积极发言，脑子里有什么就说什么', letter: 'A', value: 'E' },
+    { emoji: '💭', text: '先在心里想清楚，有把握了再说', letter: 'B', value: 'I' }
+  ]},
+  { module: 1, dimension: 'EI', type: 'single', question: '遇到新同学，你的反应：', options: [
+    { emoji: '🎉', text: '主动打招呼，很快就熟络', letter: 'A', value: 'E' },
+    { emoji: '🤔', text: '等对方先开口，观察一下再说', letter: 'B', value: 'I' }
+  ]},
+  { module: 1, dimension: 'EI', type: 'single', question: '周末你更喜欢：', options: [
+    { emoji: '🚀', text: '参加聚会、活动、社团、出门社交', letter: 'A', value: 'E' },
+    { emoji: '📚', text: '一个人在家看书、看展、深度独处', letter: 'B', value: 'I' }
+  ]},
+  // --- 模块1：MBTI S/N (4题) ---
+  { module: 1, dimension: 'SN', type: 'single', question: '老师布置了一个研究课题，你首先会：', options: [
+    { emoji: '📋', text: '查资料、找数据、把事实整理清楚', letter: 'A', value: 'S' },
+    { emoji: '💡', text: '冒出很多新想法，想找独特的切入点', letter: 'B', value: 'N' }
+  ]},
+  { module: 1, dimension: 'SN', type: 'single', question: '看小说或电影时，你更在意：', options: [
+    { emoji: '🔍', text: '情节是否真实合理，逻辑是否通顺', letter: 'A', value: 'S' },
+    { emoji: '🌊', text: '背后的寓意、情感、是否有创意', letter: 'B', value: 'N' }
+  ]},
+  { module: 1, dimension: 'SN', type: 'single', question: '解决一个新问题时，你倾向于：', options: [
+    { emoji: '🛠️', text: '参考以前用过的成功方法，稳扎稳打', letter: 'A', value: 'S' },
+    { emoji: '✨', text: '尝试全新的思路，哪怕有点冒险', letter: 'B', value: 'N' }
+  ]},
+  { module: 1, dimension: 'SN', type: 'single', question: '描述你理想中的未来，你说：', options: [
+    { emoji: '🏗️', text: '具体的、可实现的目标', letter: 'A', value: 'S' },
+    { emoji: '🌈', text: '充满可能性的、让人兴奋的蓝图', letter: 'B', value: 'N' }
+  ]},
+  // --- 模块1：MBTI T/F (4题) ---
+  { module: 1, dimension: 'TF', type: 'single', question: '和朋友吵架后，你首先想的是：', options: [
+    { emoji: '⚖️', text: '谁对谁错，应该怎么解决', letter: 'A', value: 'T' },
+    { emoji: '🤝', text: '对方的感受是什么，怎么和好', letter: 'B', value: 'F' }
+  ]},
+  { module: 1, dimension: 'TF', type: 'single', question: '选择学校时，你更看重：', options: [
+    { emoji: '📊', text: '排名、专业实力、就业前景', letter: 'A', value: 'T' },
+    { emoji: '🌱', text: '校园氛围、价值观、发展机会', letter: 'B', value: 'F' }
+  ]},
+  { module: 1, dimension: 'TF', type: 'single', question: '考试没考好，你的反应：', options: [
+    { emoji: '🧮', text: '分析哪里出了问题，制定改进计划', letter: 'A', value: 'T' },
+    { emoji: '💬', text: '先消化情绪，找人倾诉一下', letter: 'B', value: 'F' }
+  ]},
+  { module: 1, dimension: 'TF', type: 'single', question: '别人向你求助，你会：', options: [
+    { emoji: '📌', text: '直接给建议和解决方案', letter: 'A', value: 'T' },
+    { emoji: '💛', text: '先理解对方的处境和感受', letter: 'B', value: 'F' }
+  ]},
+  // --- 模块1：MBTI J/P (4题) ---
+  { module: 1, dimension: 'JP', type: 'single', question: '放假前你通常会：', options: [
+    { emoji: '📝', text: '提前做好详细计划，列出 to-do list', letter: 'A', value: 'J' },
+    { emoji: '😎', text: '随性而为，到时候再说', letter: 'B', value: 'P' }
+  ]},
+  { module: 1, dimension: 'JP', type: 'single', question: '做作业时，你习惯：', options: [
+    { emoji: '✅', text: '按时、按科目、按计划一项项完成', letter: 'A', value: 'J' },
+    { emoji: '🔄', text: '喜欢多任务并行，想到什么做什么', letter: 'B', value: 'P' }
+  ]},
+  { module: 1, dimension: 'JP', type: 'single', question: '面对突如其来的计划变更：', options: [
+    { emoji: '🚧', text: '有点不适应，喜欢按计划走', letter: 'A', value: 'J' },
+    { emoji: '🎯', text: '没关系，灵活调整就好', letter: 'B', value: 'P' }
+  ]},
+  { module: 1, dimension: 'JP', type: 'single', question: '你的书桌/房间通常是：', options: [
+    { emoji: '📂', text: '整洁有序，有条不紊', letter: 'A', value: 'J' },
+    { emoji: '🎨', text: '有点乱，但你知道每样东西在哪', letter: 'B', value: 'P' }
+  ]},
+  // --- 模块2：SBTI (10题，每题选1-2个最像你的) ---
+  { module: 2, type: 'multi', question: '以下哪些描述最符合你？（选1-2个）', options: [
+    { emoji: '🔬', text: '喜欢追根究底，想弄清楚事物背后的原理', letter: 'A', value: 'R' },
+    { emoji: '🎨', text: '喜欢用创意表达自己（写作/绘画/音乐）', letter: 'B', value: 'S' },
+    { emoji: '💰', text: '对商业活动有兴趣（创业/营销/策划）', letter: 'C', value: 'B' },
+    { emoji: '⚙️', text: '喜欢动手操作（编程/搭建/维修/实验）', letter: 'D', value: 'T' },
+    { emoji: '🤝', text: '喜欢帮助别人，善于倾听，有同理心', letter: 'E', value: 'A' }
+  ]},
+  { module: 2, type: 'multi', question: '以下哪些描述最符合你？（选1-2个）', options: [
+    { emoji: '📐', text: '喜欢分析数据、逻辑推理、做系统研究', letter: 'A', value: 'R' },
+    { emoji: '✍️', text: '追求独特和个性化，不喜欢随大流', letter: 'B', value: 'S' },
+    { emoji: '📈', text: '喜欢领导团队、推动目标达成、有竞争心', letter: 'C', value: 'B' },
+    { emoji: '🔧', text: '享受解决问题的过程，偏好明确答案', letter: 'D', value: 'T' },
+    { emoji: '💬', text: '喜欢和人打交道，组织活动让我有成就感', letter: 'E', value: 'A' }
+  ]},
+  { module: 2, type: 'multi', question: '以下哪些描述最符合你？（选1-2个）', options: [
+    { emoji: '🧪', text: '对自然科学充满好奇，想探索未知', letter: 'A', value: 'R' },
+    { emoji: '🎭', text: '喜欢表演艺术（戏剧/舞蹈/主持）', letter: 'B', value: 'S' },
+    { emoji: '🏆', text: '喜欢竞赛、追求卓越、不甘落后', letter: 'C', value: 'B' },
+    { emoji: '💻', text: '喜欢和电脑/技术打交道，编程让我兴奋', letter: 'D', value: 'T' },
+    { emoji: '🌍', text: '关心社会问题，想为他人带来改变', letter: 'E', value: 'A' }
+  ]},
+  { module: 2, type: 'multi', question: '以下哪些描述最符合你？（选1-2个）', options: [
+    { emoji: '📖', text: '喜欢阅读和深度思考，探索思想世界', letter: 'A', value: 'R' },
+    { emoji: '🎬', text: '对影像、视觉设计、创意内容有热情', letter: 'B', value: 'S' },
+    { emoji: '💼', text: '有商业头脑，关注市场和商业模式', letter: 'C', value: 'B' },
+    { emoji: '🔬', text: '喜欢做实验、验证假设、追求精确', letter: 'D', value: 'T' },
+    { emoji: '🤗', text: '擅长倾听和沟通，是朋友们的倾诉对象', letter: 'E', value: 'A' }
+  ]},
+  // --- 模块3：学习风格 (6题) ---
+  { module: 3, type: 'single', question: '学习新知识时，你更喜欢：', options: [
+    { emoji: '🎬', text: '看图表、视频、示意图', letter: 'A', value: 'V' },
+    { emoji: '🎧', text: '听讲解、讨论、音频材料', letter: 'B', value: 'A' },
+    { emoji: '🛠️', text: '做实验、实际操作、动手练习', letter: 'C', value: 'K' }
+  ]},
+  { module: 3, type: 'single', question: '复习考试时，你通常：', options: [
+    { emoji: '📊', text: '做思维导图、整理笔记、画框架', letter: 'A', value: 'V' },
+    { emoji: '🗣️', text: '大声朗读、背诵、和别人讨论', letter: 'B', value: 'A' },
+    { emoji: '✏️', text: '大量做题、模拟考试、边做边记', letter: 'C', value: 'K' }
+  ]},
+  { module: 3, type: 'single', question: '上课时最能让你集中注意力的是：', options: [
+    { emoji: '✍️', text: 'PPT、投影、老师的板书', letter: 'A', value: 'V' },
+    { emoji: '👂', text: '老师的讲解、分析和互动对话', letter: 'B', value: 'A' },
+    { emoji: '🚶', text: '小组活动、角色扮演、实地考察', letter: 'C', value: 'K' }
+  ]},
+  { module: 3, type: 'single', question: '你解决难题的方式是：', options: [
+    { emoji: '🖊️', text: '在纸上画图、列式子、在脑海中构建', letter: 'A', value: 'V' },
+    { emoji: '👥', text: '在心里默念推理、和人讨论', letter: 'B', value: 'A' },
+    { emoji: '🏃', text: '先动手试试、搜索类似例题、直接做', letter: 'C', value: 'K' }
+  ]},
+  { module: 3, type: 'single', question: '如果要记住一个概念，你最可能：', options: [
+    { emoji: '🌅', text: '想象一幅画面或场景', letter: 'A', value: 'V' },
+    { emoji: '💬', text: '记住一段话或听到的解释', letter: 'B', value: 'A' },
+    { emoji: '🌰', text: '找一个生活中的实际例子', letter: 'C', value: 'K' }
+  ]},
+  { module: 3, type: 'single', question: '以下哪种学习体验你最享受：', options: [
+    { emoji: '👁️', text: '参观科技馆、美术馆、有视觉冲击力的展览', letter: 'A', value: 'V' },
+    { emoji: '🎙️', text: '听一场精彩演讲或播客', letter: 'B', value: 'A' },
+    { emoji: '🏕️', text: '参加工作坊、户外活动、实操训练', letter: 'C', value: 'K' }
+  ]},
+  // --- 模块4：抗压韧性 (4题) ---
+  { module: 4, type: 'single', question: '期中考试前一周，你突然发现还有很多内容没复习完：', options: [
+    { emoji: '💪', text: '制定紧急计划，高效执行，相信自己能搞定', letter: 'A', value: 4 },
+    { emoji: '🤝', text: '有点慌，但会求助老师或同学', letter: 'B', value: 3 },
+    { emoji: '😰', text: '焦虑到无法行动，想放弃挣扎', letter: 'C', value: 1 },
+    { emoji: '😴', text: '先休息一下，第二天再想办法', letter: 'D', value: 2 }
+  ]},
+  { module: 4, type: 'single', question: '第一次在全英文环境做课堂展示，你的状态：', options: [
+    { emoji: '🌟', text: '兴奋！终于有机会展示了', letter: 'A', value: 4 },
+    { emoji: '🗒️', text: '紧张，但能控制，提前多练几遍', letter: 'B', value: 3 },
+    { emoji: '😣', text: '非常紧张，声音发抖，想快点结束', letter: 'C', value: 1 },
+    { emoji: '😅', text: '假装不紧张，但内心已经崩溃', letter: 'D', value: 2 }
+  ]},
+  { module: 4, type: 'single', question: '提交的作业被老师打回重做，你的反应：', options: [
+    { emoji: '🚀', text: '立即修改，越挫越勇', letter: 'A', value: 4 },
+    { emoji: '💡', text: '有点沮丧，但会认真看反馈重新做', letter: 'B', value: 3 },
+    { emoji: '🌧️', text: '怀疑自己，需要一段时间消化情绪', letter: 'C', value: 1 },
+    { emoji: '💬', text: '请教同学，借鉴别人的做法', letter: 'D', value: 2 }
+  ]},
+  { module: 4, type: 'single', question: '如果你被分到一个不喜欢的学习小组，你会：', options: [
+    { emoji: '🏆', text: '主动争取，用表现赢得认可', letter: 'A', value: 4 },
+    { emoji: '🎯', text: '接受现状，尽力合作，找到组内的价值', letter: 'B', value: 3 },
+    { emoji: '😒', text: '一直抱怨，消极应对', letter: 'C', value: 1 },
+    { emoji: '🔄', text: '找老师沟通，申请调整', letter: 'D', value: 2 }
+  ]}
+];
+
+const MODULE_NAMES  = { 1: 'MBTI人格', 2: 'SBTI兴趣', 3: '学习风格', 4: '抗压韧性' };
+const MODULE_EMOJIS = { 1: '🧠',        2: '🎯',        3: '📚',         4: '💪' };
+const MODULE_BADGE  = { 1: '', 2: 'sbti', 3: 'style', 4: 'resilience' };
+
+// ==================== 动物人格数据 ====================
+const ANIMALS = {
+  'INTJ': { emoji:'🦉', name:'猫头鹰', title:'战略家', superPower:'全局思维，擅长长期规划，执行力强', blindSpot:'过于追求完美，容易过度分析而迟迟不行动', clubs:['编程社','科学社','机器人社','学术竞赛队'] },
+  'INTP': { emoji:'🦉', name:'猫头鹰', title:'逻辑家', superPower:'深度思考者，对知识和逻辑有极致追求', blindSpot:'想法多行动少，容易陷入"思考漩涡"', clubs:['编程社','哲学社','数学社','科学期刊'] },
+  'ENTJ': { emoji:'🦁', name:'狮子',   title:'领袖',   superPower:'天生的领导者，目标感极强，决策果断', blindSpot:'有时显得强势，急于求成而忽略他人感受', clubs:['学生会','创业社','商业竞赛队','辩论队'] },
+  'ENTP': { emoji:'🦊', name:'狐狸',   title:'创新者', superPower:'点子王，思维敏捷，善于发现新可能', blindSpot:'三分钟热度，容易见异思迁难以专注', clubs:['辩论队','创客空间','科学社','演讲社'] },
+  'INFJ': { emoji:'🐺', name:'狼',      title:'理想主义者', superPower:'洞察人心，有理想有情怀，能感召他人', blindSpot:'过于在意他人看法，容易自我牺牲', clubs:['模联','志愿服务队','心理学社','文学社'] },
+  'ENFJ': { emoji:'🐺', name:'狼',      title:'激励者', superPower:'天生的社交领袖，擅长激励和带动团队', blindSpot:'过于重视认同感，难以接受冲突和批评', clubs:['模联','学生会','演讲社','社团联合会'] },
+  'INFP': { emoji:'🦋', name:'蝴蝶',   title:'调停者', superPower:'富有同理心，创造力强，追求意义感', blindSpot:'容易情绪波动，理想与现实的落差会困扰你', clubs:['文学社','摄影社','戏剧社','环保社'] },
+  'ISFP': { emoji:'🦋', name:'蝴蝶',   title:'艺术家', superPower:'审美敏锐，行动力强，专注当下', blindSpot:'回避冲突，容易妥协，过于沉默', clubs:['艺术社','音乐社','舞蹈社','摄影社'] },
+  'ENFP': { emoji:'🐬', name:'海豚',   title:'梦想家', superPower:'热情洋溢，社交达人，创意无限', blindSpot:'难以专注，容易被情绪左右，计划常落空', clubs:['戏剧社','主持人队','学生媒体','模联'] },
+  'ESFP': { emoji:'🐬', name:'海豚',   title:'表演者', superPower:'舞台魅力强，即兴能力出众，富有感染力', blindSpot:'难以承受孤独，冲动消费，讨厌条条框框', clubs:['戏剧社','舞蹈社','主持人队','学生会外联部'] },
+  'ISTJ': { emoji:'🐢', name:'乌龟',   title:'可靠型', superPower:'极度靠谱，负责任，执行力惊人', blindSpot:'抗拒变化，难以接受新观念，过于批判', clubs:['数学社','物理社','编程社','图书馆志愿者'] },
+  'ISFJ': { emoji:'🐼', name:'熊猫',   title:'守护者', superPower:'温暖体贴，默默付出，是大家最信任的后盾', blindSpot:'过度自责，不懂得拒绝，害怕冲突', clubs:['红十会','义工社','图书馆志愿者','心理社'] },
+  'ESTJ': { emoji:'🐯', name:'老虎',   title:'执行者', superPower:'高效务实，组织能力强，尊重规则', blindSpot:'缺乏灵活性，对"效率低"的人缺乏耐心', clubs:['学生会','商业社','数学竞赛队','纪律部'] },
+  'ESFJ': { emoji:'🐼', name:'熊猫',   title:'照顾者', superPower:'人际高手，热情好客，是朋友圈的粘合剂', blindSpot:'过度在意他人评价，需要学会"课题分离"', clubs:['红十会','学生会','动物保护社','教育辅导队'] },
+  'ESTP': { emoji:'🦅', name:'鹰',      title:'冒险家', superPower:'行动派，现实主义者，风险嗅觉极准', blindSpot:'缺乏长期规划，难以忍受"无聊"的系统学习', clubs:['篮球队','机器人社','编程社','STEM竞赛队'] },
+  'ISTP': { emoji:'🐢', name:'乌龟',   title:'工匠',   superPower:'动手能力极强，擅长解决具体问题，冷静', blindSpot:'兴趣狭窄时容易沉迷，难以及时表达情感', clubs:['创客空间','机器人社','航模社','电脑维修社'] }
+};
+
+const ANIMAL_QUOTES = {
+  '🦁': '"我就是主角！不管班级活动还是小组项目，我总是那个站出来承担的人。"',
+  '🦊': '"我对世界充满好奇！我喜欢找到那个\'啊哈\'的顿悟时刻。"',
+  '🦉': '"我不喜欢说废话。在我这里，没有\'差不多\'这个词。"',
+  '🦋': '"我感受得到别人感受不到的东西。那是我存在的方式。"',
+  '🐺': '"我总能看穿别人在想什么。我希望这个世界因为我变得更好一点点。"',
+  '🐬': '"Life is a party! 我是朋友圈的气氛担当，永远有说不完的话。"',
+  '🐼': '"我可能是那个默默记住所有人生日的人。被需要让我感到快乐。"',
+  '🦅': '"别跟我废话，我要的是结果。给我一个问题，给我10分钟。"',
+  '🐢': '"我不喜欢张扬，但我有自己的节奏。给我一个问题，我会安静地解决它。"',
+  '🐯': '"我要赢。压力？那是我燃烧的燃料。"',
+  '🐨': '"我不喜欢变化，我喜欢我熟悉的人和事。稳定、温暖、有耐心。"',
+  '🦄': '"我可能不太符合上面的任何一种描述。我拒绝被标签定义。"'
+};
+
+// 12动物快速选择
+const ANIMAL_PREVIEW = [
+  { emoji:'🦁', name:'狮子', key:'ENTJ' },
+  { emoji:'🦊', name:'狐狸', key:'ENTP' },
+  { emoji:'🦉', name:'猫头鹰', key:'INTP' },
+  { emoji:'🦋', name:'蝴蝶', key:'INFP' },
+  { emoji:'🐺', name:'狼', key:'ENFJ' },
+  { emoji:'🐬', name:'海豚', key:'ENFP' },
+  { emoji:'🐼', name:'熊猫', key:'ISFJ' },
+  { emoji:'🦅', name:'鹰', key:'ESTP' },
+  { emoji:'🐢', name:'乌龟', key:'ISTJ' },
+  { emoji:'🐯', name:'老虎', key:'ESTJ' },
+  { emoji:'🐨', name:'考拉', key:'ISFJ' },
+  { emoji:'🦄', name:'独角兽', key:'INFP' }
+];
+
+// ==================== 课程推荐数据 ====================
+const COURSE_MAP = {
+  R: {
+    icon: '🔬', name: '研究型',
+    main: { name: 'IB DP', sub: '研究型首选' },
+    subjects: { hl: ['数学HL','物理HL','化学HL','计算机HL'], sl: ['英语SL','中文SL','经济SL'] },
+    clubs: ['科学奥赛队','EPQ研究项目','iGEM竞赛','机器人队'],
+    why: 'IB DP的核心是IA和EE，能充分发挥你的研究能力'
+  },
+  S: {
+    icon: '🎨', name: '艺术型',
+    main: { name: 'IB DP / AP', sub: '艺术型首选' },
+    subjects: { hl: ['视觉艺术HL','音乐HL','文学HL'], sl: ['英语SL','心理学SL','经济SL'] },
+    clubs: ['艺术社','摄影社','乐队','戏剧社'],
+    why: 'IB DP艺术科目和AP艺术史能充分展现你的创作热情'
+  },
+  B: {
+    icon: '💰', name: '商业型',
+    main: { name: 'A-Level / AP', sub: '商业型首选' },
+    subjects: { hl: ['经济HL','商业管理HL','数学HL'], sl: ['会计SL','英语SL','心理SL'] },
+    clubs: ['商业竞赛队(BPA/FBLA)','创业社','学生会','经济学社'],
+    why: 'A-Level经济/商科和AP宏微观经济体系成熟，申请商科必备'
+  },
+  T: {
+    icon: '⚙️', name: '技术型',
+    main: { name: 'BC / A-Level', sub: '技术型首选' },
+    subjects: { hl: ['计算机HL','数学HL','物理HL'], sl: ['化学SL','设计技术SL','工程SL'] },
+    clubs: ['编程社','机器人队','STEM竞赛队','创客空间'],
+    why: 'BC课程实用性强，适合擅长动手和技术的你'
+  },
+  A: {
+    icon: '🤝', name: '社交型',
+    main: { name: 'IB DP', sub: '社交型首选' },
+    subjects: { hl: ['心理学HL','社会学HL','英语HL'], sl: ['中文SL','经济SL','哲学SL'] },
+    clubs: ['模联','志愿服务队','辩论社','红十会'],
+    why: 'IB DP的社会科学科目和CAS活动非常适合社交型人格'
+  }
+};
+
+// ==================== 辅助数据 ====================
+const SBTI_NAMES   = { R:'研究型', S:'艺术型', B:'商业型', T:'技术型', A:'社交型' };
+const SBTI_COLORS  = { R:'#3b82f6', S:'#ec4899', B:'#f59e0b', T:'#10b981', A:'#8b5cf6' };
+const STYLE_NAMES  = { V:'视觉型', A:'听觉型', K:'动觉型' };
+const STYLE_ICONS  = { V:'👁️', A:'👂', K:'🧠' };
+const RESILIENCE_MAP = { high:'🛡️ 高韧性', mid:'⚖️ 中韧性', grow:'🌱 成长型' };
+const MBTI_LABELS   = { E:'外向', I:'内向', S:'实感', N:'直觉', T:'思考', F:'情感', J:'判断', P:'知觉' };
+
+// ==================== 状态 ====================
+let state = {
+  screen: 'welcome',
+  currentQuestion: 0,
+  answers: {},
+  mbti: { E:0, I:0, S:0, N:0, T:0, F:0, J:0, P:0 },
+  sbti: { R:0, S:0, B:0, T:0, A:0 },
+  style: { V:0, A:0, K:0 },
+  resilience: 0
+};
+
+// ==================== 核心计算函数 ====================
+function computeMBTI() {
+  const e = state.mbti.E >= state.mbti.I ? 'E' : 'I';
+  const s = state.mbti.S >= state.mbti.N ? 'S' : 'N';
+  const t = state.mbti.T >= state.mbti.F ? 'T' : 'F';
+  const j = state.mbti.J >= state.mbti.P ? 'J' : 'P';
+  return e + s + t + j;
+}
+
+function computeSBTI() {
+  return Object.entries(state.sbti)
+    .sort((a,b) => b[1] - a[1])
+    .filter(([,v]) => v > 0)
+    .slice(0, 2)
+    .map(([k,v]) => ({ type:k, score:v }));
+}
+
+function computeStyle() {
+  const {V,A,K} = state.style;
+  if (V >= A && V >= K) return 'V';
+  if (A >= V && A >= K) return 'A';
+  return 'K';
+}
+
+function computeResilience() {
+  const r = state.resilience;
+  if (r >= 14) return 'high';
+  if (r >= 10) return 'mid';
+  return 'grow';
+}
+
+function getAnimal(mbti) {
+  return ANIMALS[mbti] || ANIMALS['ENFP'] || Object.values(ANIMALS)[0];
+}
+
+// ==================== SBTI多选计分 ====================
+function recalcSBTI() {
+  state.sbti = { R:0, S:0, B:0, T:0, A:0 };
+  // 遍历所有SBTI多选题 (module===2)
+  QUESTIONS.filter(q => q.module === 2).forEach((q, qi) => {
+    const ans = state.answers[16 + qi]; // SBTI从第16题开始
+    if (!ans || ans.length === 0) return;
+    ans.forEach(i => {
+      const v = q.options[i]?.value;
+      if (v && state.sbti[v] !== undefined) state.sbti[v]++;
+    });
+  });
+}
+
+// ==================== 渲染入口 ====================
+function render() {
+  const app = document.getElementById('app');
+  switch (state.screen) {
+    case 'welcome':    renderWelcome(app);    break;
+    case 'variant':    renderVariant(app);    break;
+    case 'test':       renderTest(app);        break;
+    case 'loading':    renderLoading(app);     break;
+    case 'result':     renderResult(app);      break;
+  }
+}
+
+// ==================== 欢迎页 ====================
+function renderWelcome(el) {
+  el.innerHTML = `
+    <div class="welcome-screen">
+      <div class="welcome-icon">🧭</div>
+      <h1 class="welcome-title">自我发现测试</h1>
+      <p class="welcome-subtitle">
+        MBTI × SBTI × 动物人格 × 国际课程匹配<br>
+        找到你的专属成长路径
+      </p>
+      <div class="welcome-animals">🦁🦊🦉🦋🐺🐬🐼🦅🐢🐯🐨🦄</div>
+      <button class="welcome-cta" onclick="startFullTest()">🚀 开始完整测试</button>
+
+      <div class="welcome-divider"><span>或</span></div>
+      <button class="welcome-animal-btn" onclick="showVariant()">
+        🐾 快速动物人格测试
+        <span style="font-size:12px;opacity:0.7">→</span>
+      </button>
+
+      <p class="welcome-info">共36题 · 约5分钟 · 适合初高中学生</p>
+    </div>
+  `;
+}
+
+// ==================== 动物人格快速预览页 ====================
+function renderVariant(el) {
+  el.innerHTML = `
+    <div style="padding:8px 0">
+      <button onclick="state.screen='welcome';render()" style="background:none;border:none;color:var(--text-muted);font-size:13px;cursor:pointer;padding:4px 0;display:flex;align-items:center;gap:4px;">
+        ← 返回
+      </button>
+    </div>
+    <div class="animal-variant-hero">
+      <div class="animal-variant-title">🐾 你是哪种动物人格？</div>
+      <div class="animal-variant-sub">选择最像你的动物，马上揭晓答案！</div>
+      <div class="animal-select-grid" id="animalGrid">
+        ${ANIMAL_PREVIEW.map((a, i) => `
+          <div class="animal-select-item" onclick="selectAnimal(${i},'${a.key}')" id="animal-${i}">
+            <span class="animal-select-icon">${a.emoji}</span>
+            <div class="animal-select-name">${a.name}</div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+    <div class="result-card" id="variantResult" style="display:none">
+      <div class="result-card-title">你的动物人格</div>
+      <div id="variantResultContent"></div>
+    </div>
+    <button class="welcome-cta" id="variantTestBtn" onclick="startFullTest()" style="display:none;width:100%;margin-top:16px">
+      🔥 做完整测试，获得精确结果
+    </button>
+  `;
+}
+
+window._variantAnswer = null;
+
+window.selectAnimal = function(index, mbtiKey) {
+  // 清除选中状态
+  document.querySelectorAll('.animal-select-item').forEach(el => el.classList.remove('selected'));
+  document.getElementById('animal-' + index).classList.add('selected');
+
+  const animal = ANIMALS[mbtiKey] || ANIMALS['ENFP'];
+  window._variantAnswer = mbtiKey;
+
+  const resultEl = document.getElementById('variantResult');
+  const btnEl = document.getElementById('variantTestBtn');
+  resultEl.style.display = 'block';
+  btnEl.style.display = 'block';
+
+  const topSBTI = { T:'技术型', S:'艺术型', B:'商业型', R:'研究型', A:'社交型' };
+  const mainType = topSBTI[mbtiKey[2]] || '研究型';
+  const courseData = COURSE_MAP[Object.keys(topSBTI).find(k => mbtiKey.includes({T:'T',S:'S',B:'B',R:'R',A:'A'}[k])) || 'R'];
+  const styleMap = { E:'视觉型', I:'听觉型', A:'动觉型', O:'视觉型' };
+  const animalData = ANIMALS[mbtiKey] || ANIMALS['ENFP'];
+
+  document.getElementById('variantResultContent').innerHTML = `
+    <div style="text-align:center;padding:12px 0">
+      <div style="font-size:72px;margin-bottom:8px">${animal.emoji}</div>
+      <div style="font-size:26px;font-weight:800;margin-bottom:2px">${animal.name}</div>
+      <div style="color:var(--secondary);font-weight:600;margin-bottom:6px">「${animal.title}」人格</div>
+      <div style="display:inline-flex;gap:4px;margin-top:4px">
+        ${mbtiKey.split('').map(l => `<span style="background:rgba(99,102,241,0.2);color:#818cf8;padding:4px 10px;border-radius:8px;font-weight:700;font-size:15px">${l}</span>`).join('')}
+      </div>
+    </div>
+    <div style="margin-top:16px">
+      <div style="font-size:12px;color:var(--text-muted);font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">✨ 超能力</div>
+      <div style="font-size:13px;color:var(--text-muted);line-height:1.6">${animal.superPower}</div>
+    </div>
+    <div style="margin-top:14px">
+      <div style="font-size:12px;color:var(--text-muted);font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">⚠️ 成长盲区</div>
+      <div style="font-size:13px;color:var(--text-muted);line-height:1.6">${animal.blindSpot}</div>
+    </div>
+    <div style="margin-top:14px">
+      <div style="font-size:12px;color:var(--text-muted);font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">📚 推荐课程</div>
+      <div style="background:rgba(99,102,241,0.1);border:1px solid rgba(99,102,241,0.3);border-radius:12px;padding:12px;text-align:center">
+        <div style="font-size:20px;font-weight:800;color:var(--primary)">${courseData?.main?.name || 'IB DP'}</div>
+        <div style="font-size:12px;color:var(--text-muted);margin-top:2px">${animal.name}型 · ${mainType}</div>
+      </div>
+    </div>
+    <div style="margin-top:14px">
+      <div style="font-size:12px;color:var(--text-muted);font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">🎯 适合社团</div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px">
+        ${animal.clubs.slice(0,4).map(c => `<span style="background:rgba(255,255,255,0.07);padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600">${c}</span>`).join('')}
+      </div>
+    </div>
+  `;
+};
+
+// ==================== 测试页 ====================
+function renderTest(el) {
+  const q    = QUESTIONS[state.currentQuestion];
+  const total = QUESTIONS.length;
+  const progress = (state.currentQuestion / total) * 100;
+  const isMulti  = q.type === 'multi';
+  const answered = state.answers[state.currentQuestion];
+  const badgeClass = MODULE_BADGE[q.module];
+
+  // 多选题：至少选1个才能下一步
+  const canNext = isMulti
+    ? (answered && answered.length > 0)
+    : (answered !== undefined);
+
+  el.innerHTML = `
+    <div class="progress-text">
+      <span>${MODULE_EMOJIS[q.module]} ${MODULE_NAMES[q.module]}</span>
+      <span>${state.currentQuestion + 1}/${total}</span>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" style="width:${progress}%"></div></div>
+
+    <div class="question-card">
+      <div class="module-badge ${badgeClass}">${MODULE_NAMES[q.module]}</div>
+      <div class="question-number">第 ${state.currentQuestion + 1} 题</div>
+      <div class="question-text">${q.question}</div>
+      ${isMulti ? `<div class="sbti-hint">💡 <span>可选1-${isMulti===true?2:3}个</span>，选最符合的描述</div>` : ''}
+
+      <div class="options ${isMulti ? 'multi-select' : ''}">
+        ${q.options.map((opt, i) => {
+          const isSelected = isMulti
+            ? (answered && answered.includes(i))
+            : (answered === i);
+          return `
+            <button class="option-btn ${isSelected ? 'selected' : ''}"
+                    onclick="${isMulti ? `toggleMulti(${i})` : `selectOption(${i})`}">
+              <span class="option-emoji">${opt.emoji}</span>
+              <span class="option-letter">${opt.letter}.</span>
+              <span>${opt.text}</span>
+            </button>`;
+        }).join('')}
+      </div>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="nav-btn prev" onclick="prevQuestion()" ${state.currentQuestion === 0 ? 'disabled' : ''}>← 上一题</button>
+      <button class="nav-btn next" onclick="nextQuestion()" ${canNext ? '' : 'disabled'}>
+        ${state.currentQuestion === total - 1 ? '🏆 查看结果' : '下一题 →'}
+      </button>
+    </div>
+  `;
+}
+
+// ==================== 加载页 ====================
+function renderLoading(el) {
+  el.innerHTML = `
+    <div class="loading">
+      <div class="loading-animal">🔮</div>
+      <div class="loading-text">正在分析你的答案...</div>
+      <div class="loading-sub">生成你的专属人格报告</div>
+      <div class="loading-bar"><div class="loading-bar-fill"></div></div>
+    </div>
+  `;
+}
+
+// ==================== 结果页 ====================
+function renderResult(el) {
+  const mbti      = computeMBTI();
+  const sbtiList  = computeSBTI();
+  const style     = computeStyle();
+  const resilience = computeResilience();
+  const animal    = getAnimal(mbti);
+  const mainSBTI  = sbtiList[0]?.type || 'R';
+  const courseData = COURSE_MAP[mainSBTI] || COURSE_MAP['R'];
+
+  // SBTI柱状图
+  const sbtiBars = Object.entries(state.sbti).map(([k, v]) => `
+    <div class="sbti-bar">
+      <span class="sbti-bar-label">${SBTI_NAMES[k]}</span>
+      <div class="sbti-bar-track">
+        <div class="sbti-bar-fill" style="width:${Math.min(v * 22, 100)}%; background:${SBTI_COLORS[k]}"></div>
+      </div>
+      <span class="sbti-bar-value">${v}</span>
+    </div>`).join('');
+
+  // MBTI字母盒子
+  const mbtiLetters = mbti.split('').map(l =>
+    `<div class="result-mbti-letter ${l}">${l}</div>`
+  ).join('');
+
+  // MBTI维度描述
+  const mbtiDesc = `${MBTI_LABELS[mbti[0]]} · ${MBTI_LABELS[mbti[1]]} · ${MBTI_LABELS[mbti[2]]} · ${MBTI_LABELS[mbti[3]]}`;
+
+  // 选课
+  const hlChips = (courseData.subjects?.hl || []).map(s => `<span class="subject-chip hl">${s}</span>`).join('');
+  const slChips = (courseData.subjects?.sl || []).map(s => `<span class="subject-chip sl">${s}</span>`).join('');
+
+  el.innerHTML = `
+    <div class="result-screen">
+      <!-- 主hero -->
+      <div class="result-hero">
+        <div class="result-hero-content">
+          <div class="result-badge">🐾 你的动物人格</div>
+          <span class="result-animal">${animal.emoji}</span>
+          <div class="result-title">${animal.name}</div>
+          <div class="result-subtitle">「${animal.title}」人格</div>
+          <div class="result-mbti">${mbtiLetters}</div>
+        </div>
+      </div>
+
+      <!-- 语录 -->
+      <div class="result-quote" style="margin:0 0 14px">${ANIMAL_QUOTES[animal.emoji]}</div>
+
+      <!-- MBTI详情 -->
+      <div class="result-card">
+        <div class="result-card-title">🧠 MBTI 人格解析</div>
+        <div class="result-card-value">${mbti}</div>
+        <div class="result-card-desc">${mbtiDesc}</div>
+        <div class="power-grid">
+          <div class="power-item">
+            <div class="power-label good">✨ 超能力</div>
+            <div class="power-text">${animal.superPower}</div>
+          </div>
+          <div class="power-item">
+            <div class="power-label bad">⚠️ 成长盲区</div>
+            <div class="power-text">${animal.blindSpot}</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SBTI -->
+      <div class="result-card">
+        <div class="result-card-title">🎯 SBTI 兴趣倾向</div>
+        <div class="sbti-chart">${sbtiBars}</div>
+        <div style="margin-top:12px;font-size:13px;color:var(--text-muted)">
+          主导类型：${sbtiList.map(s => `${SBTI_NAMES[s.type]}（${s.score}分）`).join(' + ') || '待明确'}
+        </div>
+      </div>
+
+      <!-- 学习风格 -->
+      <div class="result-card">
+        <div class="result-card-title">${STYLE_ICONS[style]} 学习风格</div>
+        <div class="result-card-value">${STYLE_NAMES[style]}</div>
+        <div class="result-card-desc">
+          ${style === 'V' ? '你的超能力是视觉处理！看图表、画思维导图、做笔记让你学得最快。复习时试试把知识画成图谱。' :
+            style === 'A' ? '听觉是你的主场！听讲、讨论、播客是你的最佳学习方式。试着把学到的东西讲给别人听。' :
+            '动手是你最擅长的学习方式！做实验、实战演练、边做边学最有效率。找机会多实操。'}
+        </div>
+      </div>
+
+      <!-- 抗压韧性 -->
+      <div class="result-card">
+        <div class="result-card-title">💪 抗压韧性</div>
+        <div class="result-card-value">${RESILIENCE_MAP[resilience]}</div>
+        <div class="result-card-desc">
+          ${resilience === 'high' ? '你能在压力下保持冷静，越挫越勇！压力对你来说反而是发挥的最佳时机。继续保持！' :
+            resilience === 'mid' ? '压力来时会有波动，但你能较快调整。建议：建立自己的压力应对"工具箱"，比如深呼吸或找人倾诉。' :
+            '韧性是可以通过练习提升的！从小挑战开始积累成功经验，你会越来越强。每次挑战都是成长的机会。'}
+        </div>
+      </div>
+
+      <!-- 课程推荐 -->
+      <div class="result-card">
+        <div class="result-card-title">${courseData.icon} 推荐课程体系</div>
+        <div class="result-card-value">${courseData.name} 专属</div>
+        <div class="course-grid">
+          <div class="course-item main">
+            <div class="course-item-icon">📚</div>
+            <div class="course-item-name">${courseData.main?.name || 'IB DP'}</div>
+            <div class="course-item-sub">首选推荐</div>
+          </div>
+          ${(courseData.main?.alt || ['A-Level','AP','BC']).filter((_,i)=>i>0).slice(0,1).map((c,i) => `
+            <div class="course-item">
+              <div class="course-item-icon">📖</div>
+              <div class="course-item-name">${c}</div>
+              <div class="course-item-sub">备选方案</div>
+            </div>`).join('')}
+        </div>
+        <div style="margin-top:12px;font-size:12px;color:var(--text-muted);background:rgba(99,102,241,0.08);padding:10px 14px;border-radius:10px;border-left:3px solid var(--primary)">
+          💡 ${courseData.why}
+        </div>
+      </div>
+
+      <!-- 选课建议 -->
+      <div class="result-card">
+        <div class="result-card-title">📖 选课建议</div>
+        <div class="result-card-desc" style="margin-bottom:10px"><strong>${animal.name}</strong>型 · ${courseData.name}的选课组合：</div>
+        <div style="font-size:12px;color:var(--text-muted);margin-bottom:6px;font-weight:700;text-transform:uppercase;letter-spacing:1px">HL（高级课程）</div>
+        <div class="subject-chips">${hlChips || '<span style="color:var(--text-muted);font-size:13px">建议与课程顾问进一步讨论</span>'}</div>
+        <div style="font-size:12px;color:var(--text-muted);margin-top:10px;margin-bottom:6px;font-weight:700;text-transform:uppercase;letter-spacing:1px">SL（标准课程）</div>
+        <div class="subject-chips">${slChips}</div>
+      </div>
+
+      <!-- 适合社团 -->
+      <div class="result-card">
+        <div class="result-card-title">🎯 适合的课外活动</div>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:4px">
+          ${(animal.clubs || []).map(c => `<span style="background:rgba(255,255,255,0.07);padding:6px 14px;border-radius:20px;font-size:13px;font-weight:600">${c}</span>`).join('')}
+        </div>
+      </div>
+
+      <!-- 操作按钮 -->
+      <button class="share-btn" onclick="shareResult()">
+        📤 分享我的动物人格
+      </button>
+      <button class="retest-btn" onclick="resetTest()">
+        🔄 重新测试
+      </button>
+    </div>
+  `;
+}
+
+// ==================== 交互函数 ====================
+window.startFullTest = function() {
+  state = {
+    screen: 'test',
+    currentQuestion: 0,
+    answers: {},
+    mbti: { E:0, I:0, S:0, N:0, T:0, F:0, J:0, P:0 },
+    sbti: { R:0, S:0, B:0, T:0, A:0 },
+    style: { V:0, A:0, K:0 },
+    resilience: 0
+  };
+  render();
+};
+
+window.showVariant = function() {
+  state.screen = 'variant';
+  window._variantAnswer = null;
+  render();
+};
+
+window.selectOption = function(index) {
+  state.answers[state.currentQuestion] = index;
+  const q = QUESTIONS[state.currentQuestion];
+  const opt = q.options[index];
+  if (q.module === 1) {
+    state.mbti[opt.value]++;
+  } else if (q.module === 3) {
+    state.style[opt.value]++;
+  } else if (q.module === 4) {
+    state.resilience += Number(opt.value);
+  }
+  render();
+};
+
+window.toggleMulti = function(index) {
+  const MAX = 2;
+  if (!state.answers[state.currentQuestion]) {
+    state.answers[state.currentQuestion] = [];
+  }
+  const arr = state.answers[state.currentQuestion];
+  const pos = arr.indexOf(index);
+  if (pos > -1) {
+    arr.splice(pos, 1);
+  } else if (arr.length < MAX) {
+    arr.push(index);
+  }
+  recalcSBTI();
+  render();
+};
+
+window.nextQuestion = function() {
+  if (state.currentQuestion < QUESTIONS.length - 1) {
+    state.currentQuestion++;
+    render();
+  } else {
+    state.screen = 'loading';
+    render();
+    setTimeout(() => {
+      state.screen = 'result';
+      render();
+    }, 1800);
+  }
+};
+
+window.prevQuestion = function() {
+  if (state.currentQuestion > 0) {
+    state.currentQuestion--;
+    render();
+  }
+};
+
+window.resetTest = function() {
+  state.screen = 'welcome';
+  render();
+};
+
+window.shareResult = function() {
+  const mbti    = computeMBTI();
+  const animal  = getAnimal(mbti);
+  const style   = computeStyle();
+  const mainSBTI = computeSBTI()[0]?.type || 'R';
+  const courseData = COURSE_MAP[mainSBTI] || COURSE_MAP['R'];
+
+  const text = `🐾 我的动物人格是【${animal.emoji}${animal.name}】！
+
+${ANIMAL_QUOTES[animal.emoji]}
+
+🧠 MBTI: ${mbti}
+🎯 兴趣类型: ${courseData.name}
+📚 推荐课程: ${courseData.main?.name || 'IB DP'}
+${STYLE_ICONS[style]} 学习风格: ${STYLE_NAMES[style]}
+
+🔗 来测测你的动物人格吧！
+#自我发现测试 #MBTI #国际课程 #${animal.name}`;
+
+  if (navigator.share) {
+    navigator.share({ title: `我的动物人格：${animal.name}`, text });
+  } else {
+    navigator.clipboard.writeText(text).then(() => {
+      const btn = document.querySelector('.share-btn');
+      if (btn) {
+        btn.textContent = '✅ 结果已复制！快去分享吧';
+        setTimeout(() => btn.textContent = '📤 分享我的动物人格', 3000);
+      }
+    });
+  }
+};
+
+// ==================== 启动 ====================
+render();
+</script>
+</body>
+</html>
